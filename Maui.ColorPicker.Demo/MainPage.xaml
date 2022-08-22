@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Maui.ColorPicker;assembly=Maui.ColorPicker"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="GhostWhite"
+             x:Class="Maui.ColorPicker.Demo.MainPage">
+
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackLayout
+            Grid.Row="0"
+            Orientation="Vertical"
+            VerticalOptions="Start">
+            <Label
+                Grid.Row="0"
+                FontSize="Medium"
+                HorizontalTextAlignment="Center"
+                TextColor="SlateGray"
+                Text="Maui.ColorPicker" />
+            <Label
+                Grid.Row="1"
+                FontSize="Medium"
+                TextColor="SlateGray"
+                HorizontalTextAlignment="Center"
+                Text="a color picker control for .NET MAUI powered on SkiaSharp" />
+        </StackLayout>
+
+        <StackLayout
+            Grid.Row="1"
+            Orientation="Vertical"
+            Spacing="15"
+            VerticalOptions="Center">
+            <Border
+                x:Name="SelectedColorDisplayFrame"
+                Background="White"
+                HeightRequest="70"
+                HorizontalOptions="Center"
+                WidthRequest="350">
+                <Label
+                    x:Name="SelectedColorValueLabel"
+                    FontAttributes="Bold"
+                    FontSize="Title"
+                    HorizontalTextAlignment="Center"
+                    Text="#COLOR"
+                    TextColor="SlateGray"
+                    VerticalTextAlignment="Center" />
+            </Border>
+            <Border
+                x:Name="ColorPickerHolderFrame"
+                HeightRequest="200"
+                HorizontalOptions="Center"
+                WidthRequest="350">
+                <controls:ColorPicker
+                    x:Name="ColorPicker"
+                    ColorListDirection="Horizontal"
+                    GradientColorStyle="DarkToColorsToLightStyle"
+                    PickedColorChanged="ColorPicker_PickedColorChanged"
+                    PointerCircleBorderUnits="0.3"
+                    PointerCircleDiameterUnits="0.7">
+                </controls:ColorPicker>
+            </Border>
+        </StackLayout>
+
+    </Grid>
+
+</ContentPage>
