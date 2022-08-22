@@ -3,7 +3,7 @@
 # Maui.ColorPicker 🎨
 a color picker control for .NET MAUI powered on SkiaSharp.
 
-[![.NET](https://github.com/nor0x/Maui.ColorPicker/actions/workflows/dotnet.yml/badge.svg)](https://github.com/nor0x/OverFlower/actions/workflows/dotnet.yml)
+[![.NET](https://github.com/nor0x/Maui.ColorPicker/actions/workflows/dotnet.yml/badge.svg)](https://github.com/nor0x/Maui.ColorPicker/actions/workflows/dotnet.yml)
 [![](https://img.shields.io/nuget/v/nor0x.Maui.ColorPicker)](https://www.nuget.org/packages/nor0x.Maui.ColorPicker)
 [![](https://img.shields.io/nuget/dt/nor0x.Maui.ColorPicker)](https://www.nuget.org/packages/nor0x.Maui.ColorPicker)
 
