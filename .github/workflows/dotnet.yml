@@ -36,7 +36,7 @@ jobs:
       uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
       with:
         # Path of NuPkg
-        nupkg-path: Maui.ColorPicker/bin/Release/*.nupkg
+        nupkg-path: **/*.nupkg
         # package repository owner
         repo-owner: nor0x
         # user account
