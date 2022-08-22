@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/nor0x/Maui.ColorPicker/main/art/icon.png" width="200px" />
+<img src="https://raw.githubusercontent.com/nor0x/Maui.ColorPicker/main/Art/icon.png" width="200px" />
 
 # Maui.ColorPicker 🎨
 a color picker control for .NET MAUI powered on SkiaSharp.
