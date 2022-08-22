@@ -15,11 +15,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore
     - name: Build
       run: |
           cd Maui.ColorPicker
+          dotnet restore
           dotnet build --no-restore --configuration Release
     - name: Publish NuGet
       # You may pin to the exact commit or the version.
