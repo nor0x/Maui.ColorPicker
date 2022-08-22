@@ -45,7 +45,7 @@
 
 	<ItemGroup>
 		<None
-			Include="..\imgs\icon.png"
+			Include="..\Art\icon.png"
 			Pack="true"
 			PackagePath="\" />
 		<Folder Include="Platforms\Android\" />
