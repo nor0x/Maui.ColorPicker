@@ -26,3 +26,5 @@ create control
     PointerCircleDiameterUnits="0.7">
 </controls:ColorPicker>
 ```
+
+more to come...  🔜
