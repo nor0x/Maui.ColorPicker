@@ -32,19 +32,25 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.1" />
+		<PackageReference
+			Include="SkiaSharp.Views.Maui.Controls"
+			Version="2.88.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="ColorPicker.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+		<MauiXaml Update="ColorPicker.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Platforms\Android\" />
-	  <Folder Include="Platforms\MacCatalyst\" />
-	  <Folder Include="Platforms\Windows\" />
+		<None
+			Include="..\imgs\icon.png"
+			Pack="true"
+			PackagePath="\" />
+		<Folder Include="Platforms\Android\" />
+		<Folder Include="Platforms\MacCatalyst\" />
+		<Folder Include="Platforms\Windows\" />
 	</ItemGroup>
 
 </Project>
