@@ -1,0 +1,46 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: |
+          cd Maui.ColorPicker
+          dotnet build --no-restore --configuration Release
+    - name: Publish NuGet
+      # You may pin to the exact commit or the version.
+      # uses: brandedoutcast/publish-nuget@c12b8546b67672ee38ac87bea491ac94a587f7cc
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        # Filepath of the project to be packaged, relative to root of repository
+        PROJECT_FILE_PATH: Maui.ColorPicker/Maui.ColorPicker.csproj
+        # API key to authenticate with NuGet server
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+    - name: Push Nupkg to GitHub Packages
+      # You may pin to the exact commit or the version.
+      # uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@462b6006e5c90f732d030b0ace2c3e7ee9d550bc
+      uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
+      with:
+        # Path of NuPkg
+        nupkg-path: Maui.ColorPicker/bin/Release/*.nupkg
+        # package repository owner
+        repo-owner: nor0x
+        # user account
+        gh-user: nor0x
+        # access token
+        token:  ${{ secrets.GITHUB_TOKEN }}
+        
