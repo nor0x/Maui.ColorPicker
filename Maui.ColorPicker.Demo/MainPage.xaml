@@ -35,21 +35,17 @@
             Orientation="Vertical"
             Spacing="15"
             VerticalOptions="Center">
-            <Border
-                x:Name="SelectedColorDisplayFrame"
-                Background="White"
-                HeightRequest="70"
-                HorizontalOptions="Center"
-                WidthRequest="350">
                 <Label
                     x:Name="SelectedColorValueLabel"
                     FontAttributes="Bold"
                     FontSize="Title"
                     HorizontalTextAlignment="Center"
+                    HeightRequest="70"
+                    HorizontalOptions="Center"
+                    WidthRequest="350"
                     Text="#COLOR"
                     TextColor="SlateGray"
                     VerticalTextAlignment="Center" />
-            </Border>
             <Border
                 x:Name="ColorPickerHolderFrame"
                 HeightRequest="200"
