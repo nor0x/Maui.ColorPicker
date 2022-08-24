@@ -16,9 +16,9 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<AssemblyVersion>1.0.0</AssemblyVersion>
-		<AssemblyFileVersion>1.0.0</AssemblyFileVersion>
-		<Version>1.0.0</Version>
+		<AssemblyVersion>1.0.1</AssemblyVersion>
+		<AssemblyFileVersion>1.0.1</AssemblyFileVersion>
+		<Version>1.0.1</Version>
 		<Title>nor0x.Maui.ColorPicker</Title>
 		<PackageId>nor0x.Maui.ColorPicker</PackageId>
 		<PackageReleaseNotes>https://github.com/nor0x/Maui.ColorPicker/releases</PackageReleaseNotes>

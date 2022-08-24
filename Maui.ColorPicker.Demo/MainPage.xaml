@@ -57,11 +57,29 @@
                 WidthRequest="350">
                 <controls:ColorPicker
                     x:Name="ColorPicker"
-                    ColorListDirection="Horizontal"
-                    GradientColorStyle="DarkToColorsToLightStyle"
+                    ColorFlowDirection="Horizontal"
+                    ColorSpectrumStyle="TintToHueToShadeStyle"
                     PickedColorChanged="ColorPicker_PickedColorChanged"
-                    PointerCircleBorderUnits="0.3"
-                    PointerCircleDiameterUnits="0.7">
+                    PointerRingBorderUnits="0.3"
+                    PointerRingDiameterUnits="0.7">
+                    <controls:ColorPicker.BaseColorList>
+                        <x:Array Type="{x:Type x:String}">
+                            <!--  Red  -->
+                            <x:String>#ff0000</x:String>
+                            <!--  Yellow  -->
+                            <x:String>#ffff00</x:String>
+                            <!--  Green (Lime)  -->
+                            <x:String>#00ff00</x:String>
+                            <!--  Aqua  -->
+                            <x:String>#00ffff</x:String>
+                            <!--  Blue  -->
+                            <x:String>#0000ff</x:String>
+                            <!--  Fuchsia  -->
+                            <x:String>#ff00ff</x:String>
+                            <!--  Red  -->
+                            <x:String>#ff0000</x:String>
+                        </x:Array>
+                    </controls:ColorPicker.BaseColorList>
                 </controls:ColorPicker>
             </Border>
         </StackLayout>

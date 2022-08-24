@@ -1,7 +1,9 @@
+using Microsoft.Maui.Graphics.Converters;
 using SkiaSharp;
-using SkiaSharp.Views.Maui.Controls;
 using SkiaSharp.Views.Maui;
-using System.Linq;
+using System.Collections;
+using SKPaintSurfaceEventArgs = SkiaSharp.Views.Maui.SKPaintSurfaceEventArgs;
+
 namespace Maui.ColorPicker;
 
 public partial class ColorPicker : ContentView
@@ -32,31 +34,38 @@ public partial class ColorPicker : ContentView
     }
 
 
-    public static readonly BindableProperty GradientColorStyleProperty
-        = BindableProperty.Create(
-            nameof(GradientColorStyle),
-            typeof(GradientColorStyle),
-            typeof(ColorPicker),
-            GradientColorStyle.ColorsToDarkStyle,
-            BindingMode.OneTime, null);
+    public static readonly BindableProperty ColorSpectrumStyleProperty
+     = BindableProperty.Create(
+         nameof(ColorSpectrumStyle),
+         typeof(ColorSpectrumStyle),
+         typeof(ColorPicker),
+         ColorSpectrumStyle.HueToShadeStyle,
+         BindingMode.Default, null,
+         propertyChanged: (bindable, value, newValue) =>
+         {
+             if (newValue != null)
+                 ((ColorPicker)bindable).CanvasView.InvalidateSurface();
+             else
+                 ((ColorPicker)bindable).ColorSpectrumStyle = default;
+         });
 
     /// <summary>
     /// Set the Color Spectrum Gradient Style
     /// </summary>
-    public GradientColorStyle GradientColorStyle
+    public ColorSpectrumStyle ColorSpectrumStyle
     {
-        get { return (GradientColorStyle)GetValue(GradientColorStyleProperty); }
-        set { SetValue(GradientColorStyleProperty, value); }
+        get { return (ColorSpectrumStyle)GetValue(ColorSpectrumStyleProperty); }
+        set { SetValue(ColorSpectrumStyleProperty, value); }
     }
 
 
-    public static readonly BindableProperty ColorListProperty
-        = BindableProperty.Create(
-            nameof(ColorList),
-            typeof(string[]),
-            typeof(ColorPicker),
-            new string[]
-            {
+    public static readonly BindableProperty BaseColorListProperty
+            = BindableProperty.Create(
+                nameof(BaseColorList),
+                typeof(IEnumerable),
+                typeof(ColorPicker),
+                new string[]
+                {
                     new Color(255, 0, 0).ToHex(), // Red
 					new Color(255, 255, 0).ToHex(), // Yellow
 					new Color(0, 255, 0).ToHex(), // Green (Lime)
@@ -64,77 +73,184 @@ public partial class ColorPicker : ContentView
 					new Color(0, 0, 255).ToHex(), // Blue
 					new Color(255, 0, 255).ToHex(), // Fuchsia
 					new Color(255, 0, 0).ToHex(), // Red
-            },
-            BindingMode.OneTime, null);
+				},
+                BindingMode.Default, null,
+                propertyChanged: (bindable, value, newValue) =>
+                {
+                    if (newValue != null)
+                        ((ColorPicker)bindable).CanvasView.InvalidateSurface();
+                    else
+                        ((ColorPicker)bindable).BaseColorList = default;
+                });
 
     /// <summary>
-    /// Sets the Color List
+    /// Sets the Base Color List
     /// </summary>
-    public string[] ColorList
+    public IEnumerable BaseColorList
     {
-        get { return (string[])GetValue(ColorListProperty); }
-        set { SetValue(ColorListProperty, value); }
+        get { return (IEnumerable)GetValue(BaseColorListProperty); }
+        set { SetValue(BaseColorListProperty, value); }
     }
 
 
-    public static readonly BindableProperty ColorListDirectionProperty
+    public static readonly BindableProperty ColorFlowDirectionProperty
         = BindableProperty.Create(
-            nameof(ColorListDirection),
-            typeof(ColorListDirection),
+            nameof(ColorFlowDirection),
+            typeof(ColorFlowDirection),
             typeof(ColorPicker),
-            ColorListDirection.Horizontal,
-            BindingMode.OneTime);
+            ColorFlowDirection.Horizontal,
+            BindingMode.Default, null,
+            propertyChanged: (bindable, value, newValue) =>
+            {
+                if (newValue != null)
+                    ((ColorPicker)bindable).CanvasView.InvalidateSurface();
+                else
+                    ((ColorPicker)bindable).ColorFlowDirection = default;
+            });
 
     /// <summary>
     /// Sets the Color List flow Direction
+    /// Horizontal or Verical
     /// </summary>
-    public ColorListDirection ColorListDirection
+    public ColorFlowDirection ColorFlowDirection
     {
-        get { return (ColorListDirection)GetValue(ColorListDirectionProperty); }
-        set { SetValue(ColorListDirectionProperty, value); }
+        get { return (ColorFlowDirection)GetValue(ColorFlowDirectionProperty); }
+        set { SetValue(ColorFlowDirectionProperty, value); }
     }
 
 
-    public static readonly BindableProperty PointerCircleDiameterUnitsProperty
+    public static readonly BindableProperty PointerRingDiameterUnitsProperty
         = BindableProperty.Create(
-            nameof(PointerCircleDiameterUnits),
+            nameof(PointerRingDiameterUnits),
             typeof(double),
             typeof(ColorPicker),
             0.6,
-            BindingMode.OneTime);
+            BindingMode.Default,
+            validateValue: (bindable, value) =>
+            {
+                return (((double)value > -1) && ((double)value <= 1));
+            },
+            propertyChanged: (bindable, value, newValue) =>
+            {
+                if (newValue != null)
+                    ((ColorPicker)bindable).CanvasView.InvalidateSurface();
+                else
+                    ((ColorPicker)bindable).PointerRingDiameterUnits = default;
+            });
 
     /// <summary>
-    /// Sets the Picker Pointer Size
+    /// Sets the Picker Pointer Ring Diameter
     /// Value must be between 0-1
     /// Calculated against the View Canvas size
     /// </summary>
-    public double PointerCircleDiameterUnits
+    public double PointerRingDiameterUnits
     {
-        get { return (double)GetValue(PointerCircleDiameterUnitsProperty); }
-        set { SetValue(PointerCircleDiameterUnitsProperty, value); }
+        get { return (double)GetValue(PointerRingDiameterUnitsProperty); }
+        set { SetValue(PointerRingDiameterUnitsProperty, value); }
     }
 
 
-    public static readonly BindableProperty PointerCircleBorderUnitsProperty
+    public static readonly BindableProperty PointerRingBorderUnitsProperty
         = BindableProperty.Create(
-            nameof(PointerCircleBorderUnits),
+            nameof(PointerRingBorderUnits),
             typeof(double),
             typeof(ColorPicker),
             0.3,
-            BindingMode.OneTime);
+            BindingMode.Default,
+            validateValue: (bindable, value) =>
+            {
+                return (((double)value > -1) && ((double)value <= 1));
+            },
+            propertyChanged: (bindable, value, newValue) =>
+            {
+                if (newValue != null)
+                    ((ColorPicker)bindable).CanvasView.InvalidateSurface();
+                else
+                    ((ColorPicker)bindable).PointerRingBorderUnits = default;
+            });
 
     /// <summary>
-    /// Sets the Picker Pointer Border Size
+    /// Sets the Picker Pointer Ring Border Size
     /// Value must be between 0-1
     /// Calculated against pixel size of Picker Pointer
     /// </summary>
-    public double PointerCircleBorderUnits
+    public double PointerRingBorderUnits
     {
-        get { return (double)GetValue(PointerCircleBorderUnitsProperty); }
-        set { SetValue(PointerCircleBorderUnitsProperty, value); }
+        get { return (double)GetValue(PointerRingBorderUnitsProperty); }
+        set { SetValue(PointerRingBorderUnitsProperty, value); }
     }
 
+
+    public static readonly BindableProperty PointerRingPositionXUnitsProperty
+        = BindableProperty.Create(
+            nameof(PointerRingPositionXUnits),
+            typeof(double),
+            typeof(ColorPicker),
+            0.5,
+            BindingMode.OneTime,
+            validateValue: (bindable, value) =>
+            {
+                return (((double)value > -1) && ((double)value <= 1));
+            },
+            propertyChanged: (bindable, value, newValue) =>
+            {
+                if (newValue != null)
+                {
+                    ((ColorPicker)bindable).SetPointerRingPosition(
+                        (double)newValue, ((ColorPicker)bindable).PointerRingPositionYUnits);
+                }
+                else
+                    ((ColorPicker)bindable).ColorFlowDirection = default;
+            });
+
+    /// <summary>
+    /// Sets the Picker Pointer X position
+    /// Value must be between 0-1
+    /// Calculated against the View Canvas Width value
+    /// </summary>
+    public double PointerRingPositionXUnits
+    {
+        get { return (double)GetValue(PointerRingPositionXUnitsProperty); }
+        set { SetValue(PointerRingPositionXUnitsProperty, value); }
+    }
+
+
+    public static readonly BindableProperty PointerRingPositionYUnitsProperty
+        = BindableProperty.Create(
+            nameof(PointerRingPositionYUnits),
+            typeof(double),
+            typeof(ColorPicker),
+            0.5,
+            BindingMode.OneTime,
+            validateValue: (bindable, value) =>
+            {
+                return (((double)value > -1) && ((double)value <= 1));
+            },
+            propertyChanged: (bindable, value, newValue) =>
+            {
+                if (newValue != null)
+                {
+                    ((ColorPicker)bindable).SetPointerRingPosition(
+                        ((ColorPicker)bindable).PointerRingPositionXUnits, (double)newValue);
+                }
+                else
+                    ((ColorPicker)bindable).ColorFlowDirection = default;
+            });
+
+    /// <summary>
+    /// Sets the Picker Pointer Y position
+    /// Value must be between 0-1
+    /// Calculated against the View Canvas Width value
+    /// </summary>
+    public double PointerRingPositionYUnits
+    {
+        get { return (double)GetValue(PointerRingPositionYUnitsProperty); }
+        set { SetValue(PointerRingPositionYUnitsProperty, value); }
+    }
+
+
     private SKPoint _lastTouchPoint = new SKPoint();
+    private bool _checkPointerInitPositionDone = false;
 
     private void CanvasView_OnPaintSurface(object sender, SKPaintSurfaceEventArgs e)
     {
@@ -152,16 +268,16 @@ public partial class ColorPicker : ContentView
         {
             paint.IsAntialias = true;
 
+            // Initiate the base Color list
+            ColorTypeConverter converter = new ColorTypeConverter();
             System.Collections.Generic.List<SKColor> colors = new System.Collections.Generic.List<SKColor>();
-            foreach(var c in ColorList)
-            {
-                colors.Add(SKColor.Parse(c));
-            }
+            foreach (var color in BaseColorList)
+                colors.Add(((Color)converter.ConvertFromInvariantString(color.ToString())).ToSKColor());
 
-            // create the gradient shader between Colors
+            // create the gradient shader between base Colors
             using (var shader = SKShader.CreateLinearGradient(
                 new SKPoint(0, 0),
-                ColorListDirection == ColorListDirection.Horizontal ?
+                ColorFlowDirection == ColorFlowDirection.Horizontal ?
                     new SKPoint(skCanvasWidth, 0) : new SKPoint(0, skCanvasHeight),
                 colors.ToArray(),
                 null,
@@ -172,18 +288,18 @@ public partial class ColorPicker : ContentView
             }
         }
 
-        // Draw darker gradient spectrum
+        // Draw secondary gradient color spectrum
         using (var paint = new SKPaint())
         {
             paint.IsAntialias = true;
 
-            // Initiate the darkened primary color list
-            var colors = GetGradientOrder();
+            // Initiate gradient color spectrum style layer
+            var colors = GetSecondaryLayerColors(ColorSpectrumStyle);
 
-            // create the gradient shader 
+            // create the gradient shader between secondary colors
             using (var shader = SKShader.CreateLinearGradient(
                 new SKPoint(0, 0),
-                ColorListDirection == ColorListDirection.Horizontal ?
+                ColorFlowDirection == ColorFlowDirection.Horizontal ?
                     new SKPoint(0, skCanvasHeight) : new SKPoint(skCanvasWidth, 0),
                 colors,
                 null,
@@ -192,6 +308,16 @@ public partial class ColorPicker : ContentView
                 paint.Shader = shader;
                 skCanvas.DrawPaint(paint);
             }
+        }
+
+        if (!_checkPointerInitPositionDone)
+        {
+            var x = ((float)skCanvasWidth * (float)PointerRingPositionXUnits);
+            var y = ((float)skCanvasHeight * (float)PointerRingPositionYUnits);
+
+            _lastTouchPoint = new SKPoint(x, y);
+
+            _checkPointerInitPositionDone = true;
         }
 
         // Picking the Pixel Color values on the Touch Point
@@ -224,30 +350,34 @@ public partial class ColorPicker : ContentView
             paintTouchPoint.Color = SKColors.White;
             paintTouchPoint.IsAntialias = true;
 
-            var valueToCalcAgainst = (skCanvasWidth > skCanvasHeight) ? skCanvasWidth : skCanvasHeight;
+            var canvasLongestLength = (skCanvasWidth > skCanvasHeight)
+                    ? skCanvasWidth : skCanvasHeight;
 
-            var pointerCircleDiameterUnits = PointerCircleDiameterUnits; // 0.6 (Default)
-            pointerCircleDiameterUnits = (float)pointerCircleDiameterUnits / 10f; //  calculate 1/10th of that value
-            var pointerCircleDiameter = (float)(valueToCalcAgainst * pointerCircleDiameterUnits);
+            // Calculate 1/10th of the units value for scaling
+            var pointerRingDiameterUnitsScaled = (float)PointerRingDiameterUnits / 10f;
+            // Calculate against Longest Length of Canvas 
+            var pointerRingDiameter = (float)canvasLongestLength
+                                                    * pointerRingDiameterUnitsScaled;
 
             // Outer circle of the Pointer (Ring)
             skCanvas.DrawCircle(
                 _lastTouchPoint.X,
                 _lastTouchPoint.Y,
-                pointerCircleDiameter / 2, paintTouchPoint);
+                (pointerRingDiameter / 2), paintTouchPoint);
 
             // Draw another circle with picked color
             paintTouchPoint.Color = touchPointColor;
 
-            var pointerCircleBorderWidthUnits = PointerCircleBorderUnits; // 0.3 (Default)
-            var pointerCircleBorderWidth = (float)pointerCircleDiameter *
-                                                    (float)pointerCircleBorderWidthUnits; // Calculate against Pointer Circle
+            // Calculate against Pointer Circle
+            var pointerRingInnerCircleDiameter = (float)pointerRingDiameter
+                                                            * (float)PointerRingBorderUnits;
 
             // Inner circle of the Pointer (Ring)
             skCanvas.DrawCircle(
                 _lastTouchPoint.X,
                 _lastTouchPoint.Y,
-                ((pointerCircleDiameter - pointerCircleBorderWidth) / 2), paintTouchPoint);
+                ((pointerRingDiameter
+                        - pointerRingInnerCircleDiameter) / 2), paintTouchPoint);
         }
 
         // Set selected color
@@ -257,105 +387,111 @@ public partial class ColorPicker : ContentView
 
     private void CanvasView_OnTouch(object sender, SKTouchEventArgs e)
     {
-        if (e.MouseButton == SKMouseButton.Unknown) return;
+#if WINDOWS
+        if (!e.InContact)
+            return;
+#endif
+
         _lastTouchPoint = e.Location;
 
         var canvasSize = CanvasView.CanvasSize;
 
         // Check for each touch point XY position to be inside Canvas
-        // Ignore any Touch event ocurred outside the Canvas region 
+        // Ignore any Touch event occured outside the Canvas region 
         if ((e.Location.X > 0 && e.Location.X < canvasSize.Width) &&
             (e.Location.Y > 0 && e.Location.Y < canvasSize.Height))
         {
             e.Handled = true;
+
+            PointerRingPositionXUnits = e.Location.X / canvasSize.Width;
+            PointerRingPositionYUnits = e.Location.Y / canvasSize.Height;
 
             // update the Canvas as you wish
             CanvasView.InvalidateSurface();
         }
     }
 
-    private SKColor[] GetGradientOrder()
+    private SKColor[] GetSecondaryLayerColors(ColorSpectrumStyle colorSpectrumStyle)
     {
-        if (GradientColorStyle == GradientColorStyle.ColorsOnlyStyle)
+        switch (colorSpectrumStyle)
         {
-            return new SKColor[]
-            {
+            case ColorSpectrumStyle.HueOnlyStyle:
+                return new SKColor[]
+                {
                         SKColors.Transparent
-            };
-        }
-        else if (GradientColorStyle == GradientColorStyle.ColorsToDarkStyle)
-        {
-            return new SKColor[]
-            {
+                };
+            case ColorSpectrumStyle.HueToShadeStyle:
+                return new SKColor[]
+                {
                         SKColors.Transparent,
                         SKColors.Black
-            };
-        }
-        else if (GradientColorStyle == GradientColorStyle.DarkToColorsStyle)
-        {
-            return new SKColor[]
-            {
+                };
+            case ColorSpectrumStyle.ShadeToHueStyle:
+                return new SKColor[]
+                {
                         SKColors.Black,
                         SKColors.Transparent
-            };
-        }
-        else if (GradientColorStyle == GradientColorStyle.ColorsToLightStyle)
-        {
-            return new SKColor[]
-            {
+                };
+            case ColorSpectrumStyle.HueToTintStyle:
+                return new SKColor[]
+                {
                         SKColors.Transparent,
                         SKColors.White
-            };
-        }
-        else if (GradientColorStyle == GradientColorStyle.LightToColorsStyle)
-        {
-            return new SKColor[]
-            {
+                };
+            case ColorSpectrumStyle.TintToHueStyle:
+                return new SKColor[]
+                {
                         SKColors.White,
                         SKColors.Transparent
-            };
-        }
-        else if (GradientColorStyle == GradientColorStyle.LightToColorsToDarkStyle)
-        {
-            return new SKColor[]
-            {
+                };
+            case ColorSpectrumStyle.TintToHueToShadeStyle:
+                return new SKColor[]
+                {
                         SKColors.White,
                         SKColors.Transparent,
                         SKColors.Black
-            };
-        }
-        else if (GradientColorStyle == GradientColorStyle.DarkToColorsToLightStyle)
-        {
-            return new SKColor[]
-            {
+                };
+            case ColorSpectrumStyle.ShadeToHueToTintStyle:
+                return new SKColor[]
+                {
                         SKColors.Black,
                         SKColors.Transparent,
                         SKColors.White
-            };
+                };
+            default:
+                return new SKColor[]
+                {
+                        SKColors.Transparent,
+                        SKColors.Black
+                };
         }
-        else
-        {
-            return new SKColor[]
-            {
-                    SKColors.Transparent,
-                    SKColors.Black
-            };
-        }
+    }
+
+    private void SetPointerRingPosition(double xPositionUnits, double yPositionUnits)
+    {
+        var xPosition = CanvasView.CanvasSize.Width
+                        * xPositionUnits; // Calculate actual X Position
+        var yPosition = CanvasView.CanvasSize.Height
+                        * yPositionUnits; // Calculate actual Y Position
+
+        // Update as last touch Position on Canvas
+        _lastTouchPoint = new SKPoint(Convert.ToSingle(xPosition), Convert.ToSingle(yPosition));
+        CanvasView.InvalidateSurface();
     }
 }
 
-public enum GradientColorStyle
+public enum ColorSpectrumStyle
 {
-    ColorsOnlyStyle,
-    ColorsToDarkStyle,
-    DarkToColorsStyle,
-    ColorsToLightStyle,
-    LightToColorsStyle,
-    LightToColorsToDarkStyle,
-    DarkToColorsToLightStyle
+    HueOnlyStyle,
+    HueToShadeStyle,
+    ShadeToHueStyle,
+    HueToTintStyle,
+    TintToHueStyle,
+    TintToHueToShadeStyle,
+    ShadeToHueToTintStyle
 }
 
-public enum ColorListDirection
+public enum ColorFlowDirection
 {
     Horizontal,
     Vertical
