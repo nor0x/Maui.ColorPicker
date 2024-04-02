@@ -46,9 +46,6 @@
 			Include="..\Art\icon.png"
 			Pack="true"
 			PackagePath="\" />
-		<Folder Include="Platforms\Android\" />
-		<Folder Include="Platforms\MacCatalyst\" />
-		<Folder Include="Platforms\Windows\" />
 	</ItemGroup>
 
 </Project>
