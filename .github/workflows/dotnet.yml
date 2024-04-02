@@ -17,10 +17,10 @@ jobs:
         dotnet-version: 8.0.x
     - name: Build
       run: |
-          dotnet workload install maui --ignore-failed-sources
           cd Maui.ColorPicker
+          dotnet workload restore
           dotnet restore
-          dotnet build --no-restore --configuration Release
+          dotnet build --configuration Release
     - name: Publish NuGet
       # You may pin to the exact commit or the version.
       # uses: brandedoutcast/publish-nuget@c12b8546b67672ee38ac87bea491ac94a587f7cc
