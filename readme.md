@@ -213,7 +213,7 @@ private void ColorPicker_PickedColorChanged(object sender, Color colorPicked)
 
 
 ## Customization
-since the control is just a `ContentView` it can be customized in many way - this is an example of a `Clip` applied to the color picker.
+since the control is just a `ContentView` it can be customized in many ways - this is an example of a `Clip` applied to the color picker.
 
 
 https://user-images.githubusercontent.com/3210391/190870180-a7851bc4-c0f1-4b60-8212-b9668aebe091.mp4
