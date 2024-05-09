@@ -16,9 +16,9 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<AssemblyVersion>1.0.3</AssemblyVersion>
-		<AssemblyFileVersion>1.0.3</AssemblyFileVersion>
-		<Version>1.0.3</Version>
+		<AssemblyVersion>2.0.0-dev</AssemblyVersion>
+		<AssemblyFileVersion>2.0.0</AssemblyFileVersion>
+		<Version>22.0.0-</Version>
 		<Title>nor0x.Maui.ColorPicker</Title>
 		<PackageId>nor0x.Maui.ColorPicker</PackageId>
 		<PackageReleaseNotes>https://github.com/nor0x/Maui.ColorPicker/releases</PackageReleaseNotes>
@@ -36,16 +36,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference
-			Include="SkiaSharp.Views.Maui.Controls"
-			Version="2.88.7" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.8" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None
-			Include="..\Art\icon.png"
-			Pack="true"
-			PackagePath="\" />
+		<None Include="..\Art\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
