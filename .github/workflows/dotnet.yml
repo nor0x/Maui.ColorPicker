@@ -1,8 +1,8 @@
-name: .NET
+name: Publish NuGet
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
+
 
 jobs:
   build:
@@ -11,6 +11,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Get Version via powershell
+      id: get_version
+      run: |
+        $version = [System.Version]::Parse((Get-Content Maui.ColorPicker/Maui.ColorPicker.csproj | Select-String -Pattern "<Version>(.*)</Version>").Matches.Groups[1].Value)
+        $env:CURRENT_VERSION = $version.ToString()
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
@@ -43,4 +48,15 @@ jobs:
         gh-user: nor0x
         # access token
         token:  ${{ secrets.GITHUB_TOKEN }}
-        
+    - name: Bump version and push tag
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v6.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        custom_tag: ${{ steps.get_version.outputs.CURRENT_VERSION }}
+    - name: Create a GitHub release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ steps.tag_version.outputs.new_tag }}
+        name: Release ${{ steps.tag_version.outputs.new_tag }}
+        body: ${{ steps.tag_version.outputs.changelog }}

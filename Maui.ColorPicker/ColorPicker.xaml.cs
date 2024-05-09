@@ -5,32 +5,72 @@ using System.Collections;
 using SKPaintSurfaceEventArgs = SkiaSharp.Views.Maui.SKPaintSurfaceEventArgs;
 
 namespace Maui.ColorPicker;
-
+/// <summary>
+/// A control that allows the user to pick a <see cref="Color"/>.
+/// </summary>
 public partial class ColorPicker : ContentView
 {
-	public ColorPicker()
-	{
-		InitializeComponent();
-	}
+    public ColorPicker()
+    {
+        InitializeComponent();
+    }
+
+    /// <summary>
+    /// Checks whether this <see cref="ColorPicker"/> is in a rendering state.
+    /// A <see cref="ColorPicker"/> in a rendering state cannot have its properties
+    /// modified by outside code.
+    /// </summary>
+    private bool _rendering = false;
+    private Color? _pendingPickedColor = null;
+
 
     /// <summary>
     /// Occurs when the Picked Color changes
     /// </summary>
-    public event EventHandler<Color>? PickedColorChanged;
+    public event EventHandler<PickedColorChangedEventArgs>? PickedColorChanged;
 
     public static readonly BindableProperty PickedColorProperty
         = BindableProperty.Create(
             nameof(PickedColor),
             typeof(Color),
-            typeof(ColorPicker));
+            typeof(ColorPicker),
+            propertyChanged: (bindable, value, newValue) =>
+            {
+                if (!newValue.Equals(value) && (bindable is ColorPicker picker))
+                {
+                    picker.PickedColorChanged?
+                        .Invoke(picker, new PickedColorChangedEventArgs((Color?)value, (Color)newValue));
+                    if (!picker._rendering)
+                    {
+                        picker._pendingPickedColor = (Color)newValue;
+                        picker.CanvasView.InvalidateSurface();
+                    }
+                }
+            });
 
     /// <summary>
-    /// Get the current Picked Color
+    /// Gets and sets the current picked <see cref="Color"/>. This is a bindable property.
     /// </summary>
+    /// <value>
+    /// A <see cref="Color"/> containing the picked color. The default value is <see langword="null"/>.
+    /// </value>
+    /// <remarks>
+    /// Setting this value to <see langword="null"/> makes the control honor the values set
+    /// to <see cref="PointerRingPositionXUnits"/> and <see cref="PointerRingPositionYUnits"/>
+    /// instead.
+    /// <br/>
+    /// Setting this property will cause the <see cref="PickedColorChanged"/> event to be emitted.
+    /// </remarks>
     public Color PickedColor
     {
         get { return (Color)GetValue(PickedColorProperty); }
-        private set { SetValue(PickedColorProperty, value); }
+        set
+        {
+            if (!_rendering)
+            {
+                SetValue(PickedColorProperty, value);
+            }
+        }
     }
 
 
@@ -50,13 +90,14 @@ public partial class ColorPicker : ContentView
          });
 
     /// <summary>
-    /// Set the Color Spectrum Gradient Style
+    /// Gets or sets the Color Spectrum Gradient Style.
     /// </summary>
     public ColorSpectrumStyle ColorSpectrumStyle
     {
         get { return (ColorSpectrumStyle)GetValue(ColorSpectrumStyleProperty); }
         set { SetValue(ColorSpectrumStyleProperty, value); }
     }
+
 
 
     public static readonly BindableProperty BaseColorListProperty
@@ -194,13 +235,11 @@ public partial class ColorPicker : ContentView
             },
             propertyChanged: (bindable, value, newValue) =>
             {
-                if (newValue != null)
+                if ((double)newValue != (double)value && bindable is ColorPicker picker && !picker._rendering)
                 {
-                    ((ColorPicker)bindable).SetPointerRingPosition(
-                        (double)newValue, ((ColorPicker)bindable).PointerRingPositionYUnits);
+                    picker._pendingPickedColor = null;
+                    picker.CanvasView.InvalidateSurface();
                 }
-                else
-                    ((ColorPicker)bindable).ColorFlowDirection = default;
             });
 
     /// <summary>
@@ -211,7 +250,13 @@ public partial class ColorPicker : ContentView
     public double PointerRingPositionXUnits
     {
         get { return (double)GetValue(PointerRingPositionXUnitsProperty); }
-        set { SetValue(PointerRingPositionXUnitsProperty, value); }
+        set
+        {
+            if (!_rendering)
+            {
+                SetValue(PointerRingPositionXUnitsProperty, value);
+            }
+        }
     }
 
 
@@ -228,13 +273,11 @@ public partial class ColorPicker : ContentView
             },
             propertyChanged: (bindable, value, newValue) =>
             {
-                if (newValue != null)
+                if ((double)newValue != (double)value && bindable is ColorPicker picker && !picker._rendering)
                 {
-                    ((ColorPicker)bindable).SetPointerRingPosition(
-                        ((ColorPicker)bindable).PointerRingPositionXUnits, (double)newValue);
+                    picker._pendingPickedColor = null;
+                    picker.CanvasView.InvalidateSurface();
                 }
-                else
-                    ((ColorPicker)bindable).ColorFlowDirection = default;
             });
 
     /// <summary>
@@ -245,15 +288,20 @@ public partial class ColorPicker : ContentView
     public double PointerRingPositionYUnits
     {
         get { return (double)GetValue(PointerRingPositionYUnitsProperty); }
-        set { SetValue(PointerRingPositionYUnitsProperty, value); }
+        set
+        {
+            if (!_rendering)
+            {
+                SetValue(PointerRingPositionYUnitsProperty, value);
+            }
+        }
     }
 
 
-    private SKPoint _lastTouchPoint = new SKPoint();
-    private bool _checkPointerInitPositionDone = false;
-
     private void CanvasView_OnPaintSurface(object sender, SKPaintSurfaceEventArgs e)
     {
+        _rendering = true;
+
         var skImageInfo = e.Info;
         var skSurface = e.Surface;
         var skCanvas = skSurface.Canvas;
@@ -270,9 +318,13 @@ public partial class ColorPicker : ContentView
 
             // Initiate the base Color list
             ColorTypeConverter converter = new ColorTypeConverter();
-            System.Collections.Generic.List<SKColor> colors = new System.Collections.Generic.List<SKColor>();
-            foreach (var color in BaseColorList)
-                colors.Add(((Color)converter.ConvertFromInvariantString(color.ToString())).ToSKColor());
+            var colors = BaseColorList
+                .Cast<object>()
+                .Select(color => converter.ConvertFromInvariantString(color?.ToString() ?? string.Empty))
+                .Where(color => color != null)
+                .Cast<Color>()
+                .Select(color => color.ToSKColor())
+                .ToList();
 
             // create the gradient shader between base Colors
             using (var shader = SKShader.CreateLinearGradient(
@@ -310,37 +362,95 @@ public partial class ColorPicker : ContentView
             }
         }
 
-        if (!_checkPointerInitPositionDone)
-        {
-            var x = ((float)skCanvasWidth * (float)PointerRingPositionXUnits);
-            var y = ((float)skCanvasHeight * (float)PointerRingPositionYUnits);
-
-            _lastTouchPoint = new SKPoint(x, y);
-
-            _checkPointerInitPositionDone = true;
-        }
-
-        // Picking the Pixel Color values on the Touch Point
-
+        SKPoint touchPoint;
         // Represent the color of the current Touch point
         SKColor touchPointColor;
 
-        // Efficient and fast
-        // https://forums.xamarin.com/discussion/92899/read-a-pixel-info-from-a-canvas
-        // create the 1x1 bitmap (auto allocates the pixel buffer)
-        using (SKBitmap bitmap = new SKBitmap(skImageInfo))
+        if (_pendingPickedColor == null)
         {
-            // get the pixel buffer for the bitmap
-            IntPtr dstpixels = bitmap.GetPixels();
+            // The user hasn't explicitly specified the touchPoint color.
+            // The touchPoint can therefore be calculated quickly.
+            touchPoint = new SKPoint(
+                x: skCanvasWidth * (float)PointerRingPositionXUnits,
+                y: skCanvasHeight * (float)PointerRingPositionYUnits);
+            // Picking the Pixel Color values on the Touch Point
 
-            // read the surface into the bitmap
-            skSurface.ReadPixels(skImageInfo,
-                dstpixels,
-                skImageInfo.RowBytes,
-                (int)_lastTouchPoint.X, (int)_lastTouchPoint.Y);
+            // Efficient and fast
+            // https://forums.xamarin.com/discussion/92899/read-a-pixel-info-from-a-canvas
+            // create the 1x1 bitmap (auto allocates the pixel buffer)
+            using (SKBitmap bitmap = new SKBitmap(skImageInfo))
+            {
+                // get the pixel buffer for the bitmap
+                IntPtr dstpixels = bitmap.GetPixels();
 
-            // access the color
-            touchPointColor = bitmap.GetPixel(0, 0);
+                // read the surface into the bitmap
+                skSurface.ReadPixels(skImageInfo,
+                    dstpixels,
+                    skImageInfo.RowBytes,
+                    (int)touchPoint.X, (int)touchPoint.Y);
+
+                // access the color
+                touchPointColor = bitmap.GetPixel(0, 0);
+            }
+
+            // Set selected color
+            SetValue(PickedColorProperty, touchPointColor.ToMauiColor());
+        }
+        else
+        {
+            // We'll have to brute force the board to find the nearest color.
+            touchPointColor = _pendingPickedColor.ToSKColor();
+            using var bitmap = new SKBitmap(skImageInfo);
+            var dstpixels = bitmap.GetPixels();
+            skSurface.ReadPixels(skImageInfo, dstpixels, skImageInfo.RowBytes, 0, 0);
+
+            int desiredX = -1;
+            int desiredY = -1;
+            int nearestDesiredX = -1;
+            int nearestDesiredY = -1;
+            int distance = int.MaxValue;
+
+            for (int x = 0; x < bitmap.Width; ++x)
+            {
+                for (int y = 0; y < bitmap.Height; ++y)
+                {
+                    var currentColor = bitmap.GetPixel(x, y);
+                    if (currentColor == touchPointColor)
+                    {
+                        desiredX = x;
+                        desiredY = y;
+                        goto found;
+                    }
+                    else
+                    {
+                        var currentDistance =
+                            Math.Abs(currentColor.Red - touchPointColor.Red) +
+                            Math.Abs(currentColor.Green - touchPointColor.Green) +
+                            Math.Abs(currentColor.Blue - touchPointColor.Blue) +
+                            Math.Abs(currentColor.Alpha - touchPointColor.Alpha);
+
+                        if (currentDistance < distance)
+                        {
+                            distance = currentDistance;
+                            nearestDesiredX = x;
+                            nearestDesiredY = y;
+                        }
+                    }
+                }
+            }
+        found:
+            if (desiredX != -1 && desiredY != -1)
+            {
+                touchPoint = new SKPoint(desiredX, desiredY);
+            }
+            else
+            {
+                touchPoint = new SKPoint(nearestDesiredX, nearestDesiredY);
+            }
+
+            // Set pointer position.
+            SetValue(PointerRingPositionXUnitsProperty, (double)touchPoint.X / skCanvasWidth);
+            SetValue(PointerRingPositionYUnitsProperty, (double)touchPoint.Y / skCanvasHeight);
         }
 
         // Painting the Touch point
@@ -361,8 +471,8 @@ public partial class ColorPicker : ContentView
 
             // Outer circle of the Pointer (Ring)
             skCanvas.DrawCircle(
-                _lastTouchPoint.X,
-                _lastTouchPoint.Y,
+                touchPoint.X,
+                touchPoint.Y,
                 (pointerRingDiameter / 2), paintTouchPoint);
 
             // Draw another circle with picked color
@@ -374,15 +484,13 @@ public partial class ColorPicker : ContentView
 
             // Inner circle of the Pointer (Ring)
             skCanvas.DrawCircle(
-                _lastTouchPoint.X,
-                _lastTouchPoint.Y,
+                touchPoint.X,
+                touchPoint.Y,
                 ((pointerRingDiameter
                         - pointerRingInnerCircleDiameter) / 2), paintTouchPoint);
         }
 
-        // Set selected color
-        PickedColor = touchPointColor.ToMauiColor();
-        PickedColorChanged?.Invoke(this, PickedColor);
+        _rendering = false;
     }
 
     private void CanvasView_OnTouch(object sender, SKTouchEventArgs e)
@@ -392,7 +500,6 @@ public partial class ColorPicker : ContentView
             return;
 #endif
 
-        _lastTouchPoint = e.Location;
 
         var canvasSize = CanvasView.CanvasSize;
 
@@ -403,10 +510,14 @@ public partial class ColorPicker : ContentView
         {
             e.Handled = true;
 
-            PointerRingPositionXUnits = e.Location.X / canvasSize.Width;
-            PointerRingPositionYUnits = e.Location.Y / canvasSize.Height;
+            _pendingPickedColor = null;
 
-            // update the Canvas as you wish
+            // Prevent double re-rendering.
+            _rendering = true;
+            SetValue(PointerRingPositionXUnitsProperty, e.Location.X / canvasSize.Width);
+            SetValue(PointerRingPositionYUnitsProperty, e.Location.Y / canvasSize.Height);
+            _rendering = false;
+
             CanvasView.InvalidateSurface();
         }
     }
@@ -465,18 +576,6 @@ public partial class ColorPicker : ContentView
                         SKColors.Black
                 };
         }
-    }
-
-    private void SetPointerRingPosition(double xPositionUnits, double yPositionUnits)
-    {
-        var xPosition = CanvasView.CanvasSize.Width
-                        * xPositionUnits; // Calculate actual X Position
-        var yPosition = CanvasView.CanvasSize.Height
-                        * yPositionUnits; // Calculate actual Y Position
-
-        // Update as last touch Position on Canvas
-        _lastTouchPoint = new SKPoint(Convert.ToSingle(xPosition), Convert.ToSingle(yPosition));
-        CanvasView.InvalidateSurface();
     }
 }
 
