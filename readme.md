@@ -31,7 +31,7 @@ create control
 ## Bindable Properties
 
 ### ```ColorPicked```: 
-Gets the Picked Color of the Color Picker.
+Gets or sets the Picked Color of the Color Picker.
 
 XAML:
 ```xml
