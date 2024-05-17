@@ -19,11 +19,11 @@ create control
 ```xml
 <controls:ColorPicker
     x:Name="ColorPicker"
-    ColorListDirection="Horizontal"
-    GradientColorStyle="DarkToColorsToLightStyle"
+    ColorFlowDirection="Horizontal"
+    ColorSpectrumStyle="ShadeToHueStyle"
     PickedColorChanged="ColorPicker_PickedColorChanged"
-    PointerCircleBorderUnits="0.3"
-    PointerCircleDiameterUnits="0.7">
+    PointerRingBorderUnits="0.3"
+    PointerRingDiameterUnits="0.7">
 </controls:ColorPicker>
 ```
 

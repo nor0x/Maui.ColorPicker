@@ -72,8 +72,4 @@
 		<ProjectReference Include="..\Maui.ColorPicker\Maui.ColorPicker.csproj" />
 	</ItemGroup>
 
-	<!--<ItemGroup>
-	  <ProjectReference Include="..\Maui.ColorPicker\Maui.ColorPicker.csproj" />
-	</ItemGroup>-->
-
 </Project>
