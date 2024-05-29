@@ -281,6 +281,25 @@ public partial class ColorPicker : ContentView
             });
 
     /// <summary>
+    /// Gets or sets the type of touch action that triggers the color selection.
+    /// </summary>
+    /// <value>
+    /// The type of touch action. The default is <see cref="TouchActionType.OnTouchDown"/>.
+    /// </value>
+    public TouchActionType TouchActionType
+    {
+        get => (TouchActionType)GetValue(TouchActionTypeProperty);
+        set => SetValue(TouchActionTypeProperty, value);
+    }
+
+    public static readonly BindableProperty TouchActionTypeProperty =
+    BindableProperty.Create(
+        nameof(TouchActionType),
+        typeof(TouchActionType),
+        typeof(ColorPicker),
+        TouchActionType.OnTouchDown);
+
+    /// <summary>
     /// Sets the Picker Pointer Y position
     /// Value must be between 0-1
     /// Calculated against the View Canvas Width value
@@ -393,8 +412,11 @@ public partial class ColorPicker : ContentView
                 touchPointColor = bitmap.GetPixel(0, 0);
             }
 
-            // Set selected color
-            SetValue(PickedColorProperty, touchPointColor.ToMauiColor());
+            // Set selected color on touch down or prepare the pending color for touch up
+            if (TouchActionType == TouchActionType.OnTouchUp)
+                _pendingPickedColor = touchPointColor.ToMauiColor();
+            else
+                SetValue(PickedColorProperty, touchPointColor.ToMauiColor());
         }
         else
         {
@@ -499,7 +521,14 @@ public partial class ColorPicker : ContentView
         if (!e.InContact)
             return;
 #endif
-
+        // Select the pending color if set to do so on touch up
+        if (TouchActionType == TouchActionType.OnTouchUp
+            && e.ActionType == SKTouchAction.Released
+            && _pendingPickedColor != null)
+        {
+            SetValue(PickedColorProperty, _pendingPickedColor);
+            return;
+        }
 
         var canvasSize = CanvasView.CanvasSize;
 
@@ -594,4 +623,10 @@ public enum ColorFlowDirection
 {
     Horizontal,
     Vertical
+}
+
+public enum TouchActionType
+{
+    OnTouchDown,
+    OnTouchUp
 }
