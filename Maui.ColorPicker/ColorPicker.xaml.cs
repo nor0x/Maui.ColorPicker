@@ -36,6 +36,7 @@ public partial class ColorPicker : ContentView
             typeof(ColorPicker),
             propertyChanged: (bindable, value, newValue) =>
             {
+                if (newValue is null) return;
                 if (!newValue.Equals(value) && (bindable is ColorPicker picker))
                 {
                     picker.PickedColorChanged?
@@ -519,7 +520,13 @@ public partial class ColorPicker : ContentView
     {
 #if WINDOWS
         if (!e.InContact)
-            return;
+        {
+            if (TouchActionType == TouchActionType.OnTouchUp)
+            {
+                SetValue(PickedColorProperty, _pendingPickedColor);
+            }
+		    return;
+        }
 #endif
         // Select the pending color if set to do so on touch up
         if (TouchActionType == TouchActionType.OnTouchUp
