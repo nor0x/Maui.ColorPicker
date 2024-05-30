@@ -51,6 +51,7 @@
                                       ColorSpectrumStyle="TintToHueToShadeStyle"
                                       PickedColorChanged="ColorPicker_PickedColorChanged"
                                       PickedColor="IndianRed"
+									  TouchActionType="OnTouchUp"
                                       PointerRingBorderUnits="0.3"
                                       PointerRingDiameterUnits="0.7">
                     <controls:ColorPicker.BaseColorList>
