@@ -11,6 +11,20 @@ a color picker control for .NET MAUI powered by SkiaSharp.
 this is largely based on `XFColorPickerControl` for Xamarin.Forms (https://github.com/UdaraAlwis/XFColorPickerControl) by [UdaraAlwis](https://github.com/UdaraAlwis) who allowed me to publish this updated version of the control 🙌
 
 ## Getting Started
+
+initialize SkiaSharp in your app by calling the `UseSkiaSharp` method on the `MauiAppBuilder`
+```csharp
+public static MauiApp CreateMauiApp()
+        {
+            var builder = MauiApp.CreateBuilder();
+            builder
+                .UseMauiApp<App>()
+                .UseSkiaSharp()
+		...
+```
+  
+
+
 add namespace
 ```xml
  xmlns:controls="clr-namespace:Maui.ColorPicker;assembly=Maui.ColorPicker"
