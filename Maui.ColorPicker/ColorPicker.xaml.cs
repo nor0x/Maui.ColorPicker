@@ -23,6 +23,10 @@ public partial class ColorPicker : ContentView
     private bool _rendering = false;
     private Color? _pendingPickedColor = null;
 
+    /// <summary>
+    /// The pending color to pick which is prepared and applied when using <see cref="TouchActionType.OnTouchUp"/>
+    /// </summary>
+    private Color? _touchUpPendingColor = null;
 
     /// <summary>
     /// Occurs when the Picked Color changes
@@ -317,7 +321,6 @@ public partial class ColorPicker : ContentView
         }
     }
 
-
     private void CanvasView_OnPaintSurface(object sender, SKPaintSurfaceEventArgs e)
     {
         _rendering = true;
@@ -415,7 +418,7 @@ public partial class ColorPicker : ContentView
 
             // Set selected color on touch down or prepare the pending color for touch up
             if (TouchActionType == TouchActionType.OnTouchUp)
-                _pendingPickedColor = touchPointColor.ToMauiColor();
+                _touchUpPendingColor = touchPointColor.ToMauiColor();
             else
                 SetValue(PickedColorProperty, touchPointColor.ToMauiColor());
         }
@@ -531,9 +534,9 @@ public partial class ColorPicker : ContentView
         // Select the pending color if set to do so on touch up
         if (TouchActionType == TouchActionType.OnTouchUp
             && e.ActionType == SKTouchAction.Released
-            && _pendingPickedColor != null)
+            && _touchUpPendingColor != null)
         {
-            SetValue(PickedColorProperty, _pendingPickedColor);
+            SetValue(PickedColorProperty, _touchUpPendingColor);
             return;
         }
 
