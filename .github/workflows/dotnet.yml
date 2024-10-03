@@ -16,6 +16,7 @@ jobs:
       run: |
         $version = [System.Version]::Parse((Get-Content Maui.ColorPicker/Maui.ColorPicker.csproj | Select-String -Pattern "<Version>(.*)</Version>").Matches.Groups[1].Value)
         $env:CURRENT_VERSION = $version.ToString()
+        echo "::set-output name=CURRENT_VERSION::$env:CURRENT_VERSION"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
