@@ -48,9 +48,18 @@ jobs:
         gh-user: nor0x
         # access token
         token:  ${{ secrets.GITHUB_TOKEN }}
+    - name: Create GitHub Tag
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v6.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        default_bump: false
+        custom_tag: ${{ steps.get_version.outputs.CURRENT_VERSION }}
     - name: Create a GitHub release
       uses: ncipollo/release-action@v1
       with:
-        tag: ${{ steps.get_version.outputs.CURRENT_VERSION }}
+        tag: ${{ steps.tag_version.outputs.new_tag }}
         name: Release ${{ steps.get_version.outputs.CURRENT_VERSION }}
-        body: ${{ steps.tag_version.outputs.changelog }}
+        body: |
+          # Release ${{ steps.get_version.outputs.CURRENT_VERSION }}
+          This release is based on the commit: ${{ github.event.repository.full_name }}@${{ github.sha }}.
