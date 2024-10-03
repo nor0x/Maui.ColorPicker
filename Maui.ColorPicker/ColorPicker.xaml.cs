@@ -22,12 +22,13 @@ public partial class ColorPicker : ContentView
     /// </summary>
     private bool _rendering = false;
     private Color? _pendingPickedColor = null;
+	private SKColor _touchPointColor;
 
 
-    /// <summary>
-    /// Occurs when the Picked Color changes
-    /// </summary>
-    public event EventHandler<PickedColorChangedEventArgs>? PickedColorChanged;
+	/// <summary>
+	/// Occurs when the Picked Color changes
+	/// </summary>
+	public event EventHandler<PickedColorChangedEventArgs>? PickedColorChanged;
 
     public static readonly BindableProperty PickedColorProperty
         = BindableProperty.Create(
@@ -384,7 +385,6 @@ public partial class ColorPicker : ContentView
 
         SKPoint touchPoint;
         // Represent the color of the current Touch point
-        SKColor touchPointColor;
 
         if (_pendingPickedColor == null)
         {
@@ -410,19 +410,19 @@ public partial class ColorPicker : ContentView
                     (int)touchPoint.X, (int)touchPoint.Y);
 
                 // access the color
-                touchPointColor = bitmap.GetPixel(0, 0);
+                _touchPointColor = bitmap.GetPixel(0, 0);
             }
 
             // Set selected color on touch down or prepare the pending color for touch up
             if (TouchActionType == TouchActionType.OnTouchUp)
-                _pendingPickedColor = touchPointColor.ToMauiColor();
+                _pendingPickedColor = _touchPointColor.ToMauiColor();
             else
-                SetValue(PickedColorProperty, touchPointColor.ToMauiColor());
+                SetValue(PickedColorProperty, _touchPointColor.ToMauiColor());
         }
         else
         {
-            // We'll have to brute force the board to find the nearest color.
-            touchPointColor = _pendingPickedColor.ToSKColor();
+			// We'll have to brute force the board to find the nearest color.
+			_touchPointColor = _pendingPickedColor.ToSKColor();
             using var bitmap = new SKBitmap(skImageInfo);
             var dstpixels = bitmap.GetPixels();
             skSurface.ReadPixels(skImageInfo, dstpixels, skImageInfo.RowBytes, 0, 0);
@@ -438,7 +438,7 @@ public partial class ColorPicker : ContentView
                 for (int y = 0; y < bitmap.Height; ++y)
                 {
                     var currentColor = bitmap.GetPixel(x, y);
-                    if (currentColor == touchPointColor)
+                    if (currentColor == _touchPointColor)
                     {
                         desiredX = x;
                         desiredY = y;
@@ -446,18 +446,18 @@ public partial class ColorPicker : ContentView
                     }
                     else
                     {
-                        var currentDistance =
-                            Math.Abs(currentColor.Red - touchPointColor.Red) +
-                            Math.Abs(currentColor.Green - touchPointColor.Green) +
-                            Math.Abs(currentColor.Blue - touchPointColor.Blue) +
-                            Math.Abs(currentColor.Alpha - touchPointColor.Alpha);
+                                var currentDistance =
+                                Math.Abs(currentColor.Red - _touchPointColor.Red) +
+                                Math.Abs(currentColor.Green - _touchPointColor.Green) +
+                                Math.Abs(currentColor.Blue - _touchPointColor.Blue) +
+                                Math.Abs(currentColor.Alpha - _touchPointColor.Alpha);
 
-                        if (currentDistance < distance)
-                        {
-                            distance = currentDistance;
-                            nearestDesiredX = x;
-                            nearestDesiredY = y;
-                        }
+                            if (currentDistance < distance)
+                            {
+                                distance = currentDistance;
+                                nearestDesiredX = x;
+                                nearestDesiredY = y;
+                            }
                     }
                 }
             }
@@ -499,10 +499,10 @@ public partial class ColorPicker : ContentView
                 (pointerRingDiameter / 2), paintTouchPoint);
 
             // Draw another circle with picked color
-            paintTouchPoint.Color = touchPointColor;
+            paintTouchPoint.Color = _touchPointColor;
 
-            // Calculate against Pointer Circle
-            var pointerRingInnerCircleDiameter = (float)pointerRingDiameter
+			// Calculate against Pointer Circle
+			var pointerRingInnerCircleDiameter = (float)pointerRingDiameter
                                                             * (float)PointerRingBorderUnits;
 
             // Inner circle of the Pointer (Ring)
@@ -530,9 +530,12 @@ public partial class ColorPicker : ContentView
 #endif
         // Select the pending color if set to do so on touch up
         if (TouchActionType == TouchActionType.OnTouchUp
-            && e.ActionType == SKTouchAction.Released
-            && _pendingPickedColor != null)
+            && e.ActionType == SKTouchAction.Released)
         {
+            if(_pendingPickedColor is null)
+            {
+                _pendingPickedColor = _touchPointColor.ToMauiColor();
+			}
             SetValue(PickedColorProperty, _pendingPickedColor);
             return;
         }
