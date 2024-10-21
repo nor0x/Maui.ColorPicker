@@ -43,12 +43,4 @@
 		<None Include="..\Art\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.91" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.91" />
-	</ItemGroup>
-
 </Project>
