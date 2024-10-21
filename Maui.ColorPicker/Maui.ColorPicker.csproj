@@ -36,7 +36,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.8" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.0.0-preview.5.3" />
 	</ItemGroup>
 
 	<ItemGroup>
