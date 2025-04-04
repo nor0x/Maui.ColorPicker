@@ -22,13 +22,12 @@ public partial class ColorPicker : ContentView
     /// </summary>
     private bool _rendering = false;
     private Color? _pendingPickedColor = null;
-	private SKColor _touchPointColor;
+    private SKColor _touchPointColor;
 
-
-	/// <summary>
-	/// Occurs when the Picked Color changes
-	/// </summary>
-	public event EventHandler<PickedColorChangedEventArgs>? PickedColorChanged;
+    /// <summary>
+    /// Occurs when the Picked Color changes
+    /// </summary>
+    public event EventHandler<PickedColorChangedEventArgs>? PickedColorChanged;
 
     public static readonly BindableProperty PickedColorProperty
         = BindableProperty.Create(
@@ -294,6 +293,25 @@ public partial class ColorPicker : ContentView
         set => SetValue(TouchActionTypeProperty, value);
     }
 
+    public static readonly BindableProperty BitmapProperty =
+    BindableProperty.Create(
+        nameof(Bitmap),
+        typeof(SKBitmap),
+        typeof(ColorPicker),
+        null);
+
+    /// <summary>
+    /// Gets and Sets the background bitmap.
+    /// </summary>
+    /// <value>
+    /// A bitmap to use instead of the colors/>.
+    /// </value>
+    public SKBitmap Bitmap
+    {
+        get => (SKBitmap)GetValue(BitmapProperty);
+        set => SetValue(BitmapProperty, value);
+    }
+
     public static readonly BindableProperty TouchActionTypeProperty =
     BindableProperty.Create(
         nameof(TouchActionType),
@@ -332,54 +350,63 @@ public partial class ColorPicker : ContentView
 
         skCanvas.Clear(SKColors.White);
 
-        // Draw gradient rainbow Color spectrum
-        using (var paint = new SKPaint())
+        if (Bitmap != null)
         {
-            paint.IsAntialias = true;
-
-            // Initiate the base Color list
-            ColorTypeConverter converter = new ColorTypeConverter();
-            var colors = BaseColorList
-                .Cast<object>()
-                .Select(color => converter.ConvertFromInvariantString(color?.ToString() ?? string.Empty))
-                .Where(color => color != null)
-                .Cast<Color>()
-                .Select(color => color.ToSKColor())
-                .ToList();
-
-            // create the gradient shader between base Colors
-            using (var shader = SKShader.CreateLinearGradient(
-                new SKPoint(0, 0),
-                ColorFlowDirection == ColorFlowDirection.Horizontal ?
-                    new SKPoint(skCanvasWidth, 0) : new SKPoint(0, skCanvasHeight),
-                colors.ToArray(),
-                null,
-                SKShaderTileMode.Clamp))
-            {
-                paint.Shader = shader;
-                skCanvas.DrawPaint(paint);
-            }
+            // Draw the bitmap
+            var bitmapRect = new SKRect(0, 0, skCanvasWidth, skCanvasHeight);
+            skCanvas.DrawBitmap(Bitmap, bitmapRect);
         }
-
-        // Draw secondary gradient color spectrum
-        using (var paint = new SKPaint())
+        else
         {
-            paint.IsAntialias = true;
-
-            // Initiate gradient color spectrum style layer
-            var colors = GetSecondaryLayerColors(ColorSpectrumStyle);
-
-            // create the gradient shader between secondary colors
-            using (var shader = SKShader.CreateLinearGradient(
-                new SKPoint(0, 0),
-                ColorFlowDirection == ColorFlowDirection.Horizontal ?
-                    new SKPoint(0, skCanvasHeight) : new SKPoint(skCanvasWidth, 0),
-                colors,
-                null,
-                SKShaderTileMode.Clamp))
+            // Draw gradient rainbow Color spectrum
+            using (var paint = new SKPaint())
             {
-                paint.Shader = shader;
-                skCanvas.DrawPaint(paint);
+                paint.IsAntialias = true;
+
+                // Initiate the base Color list
+                ColorTypeConverter converter = new ColorTypeConverter();
+                var colors = BaseColorList
+                    .Cast<object>()
+                    .Select(color => converter.ConvertFromInvariantString(color?.ToString() ?? string.Empty))
+                    .Where(color => color != null)
+                    .Cast<Color>()
+                    .Select(color => color.ToSKColor())
+                    .ToList();
+
+                // create the gradient shader between base Colors
+                using (var shader = SKShader.CreateLinearGradient(
+                    new SKPoint(0, 0),
+                    ColorFlowDirection == ColorFlowDirection.Horizontal ?
+                        new SKPoint(skCanvasWidth, 0) : new SKPoint(0, skCanvasHeight),
+                    colors.ToArray(),
+                    null,
+                    SKShaderTileMode.Clamp))
+                {
+                    paint.Shader = shader;
+                    skCanvas.DrawPaint(paint);
+                }
+            }
+
+            // Draw secondary gradient color spectrum
+            using (var paint = new SKPaint())
+            {
+                paint.IsAntialias = true;
+
+                // Initiate gradient color spectrum style layer
+                var colors = GetSecondaryLayerColors(ColorSpectrumStyle);
+
+                // create the gradient shader between secondary colors
+                using (var shader = SKShader.CreateLinearGradient(
+                    new SKPoint(0, 0),
+                    ColorFlowDirection == ColorFlowDirection.Horizontal ?
+                        new SKPoint(0, skCanvasHeight) : new SKPoint(skCanvasWidth, 0),
+                    colors,
+                    null,
+                    SKShaderTileMode.Clamp))
+                {
+                    paint.Shader = shader;
+                    skCanvas.DrawPaint(paint);
+                }
             }
         }
 
@@ -421,8 +448,8 @@ public partial class ColorPicker : ContentView
         }
         else
         {
-			// We'll have to brute force the board to find the nearest color.
-			_touchPointColor = _pendingPickedColor.ToSKColor();
+            // We'll have to brute force the board to find the nearest color.
+            _touchPointColor = _pendingPickedColor.ToSKColor();
             using var bitmap = new SKBitmap(skImageInfo);
             var dstpixels = bitmap.GetPixels();
             skSurface.ReadPixels(skImageInfo, dstpixels, skImageInfo.RowBytes, 0, 0);
@@ -446,18 +473,18 @@ public partial class ColorPicker : ContentView
                     }
                     else
                     {
-                                var currentDistance =
-                                Math.Abs(currentColor.Red - _touchPointColor.Red) +
-                                Math.Abs(currentColor.Green - _touchPointColor.Green) +
-                                Math.Abs(currentColor.Blue - _touchPointColor.Blue) +
-                                Math.Abs(currentColor.Alpha - _touchPointColor.Alpha);
+                        var currentDistance =
+                        Math.Abs(currentColor.Red - _touchPointColor.Red) +
+                        Math.Abs(currentColor.Green - _touchPointColor.Green) +
+                        Math.Abs(currentColor.Blue - _touchPointColor.Blue) +
+                        Math.Abs(currentColor.Alpha - _touchPointColor.Alpha);
 
-                            if (currentDistance < distance)
-                            {
-                                distance = currentDistance;
-                                nearestDesiredX = x;
-                                nearestDesiredY = y;
-                            }
+                        if (currentDistance < distance)
+                        {
+                            distance = currentDistance;
+                            nearestDesiredX = x;
+                            nearestDesiredY = y;
+                        }
                     }
                 }
             }
@@ -501,8 +528,8 @@ public partial class ColorPicker : ContentView
             // Draw another circle with picked color
             paintTouchPoint.Color = _touchPointColor;
 
-			// Calculate against Pointer Circle
-			var pointerRingInnerCircleDiameter = (float)pointerRingDiameter
+            // Calculate against Pointer Circle
+            var pointerRingInnerCircleDiameter = (float)pointerRingDiameter
                                                             * (float)PointerRingBorderUnits;
 
             // Inner circle of the Pointer (Ring)
@@ -532,10 +559,10 @@ public partial class ColorPicker : ContentView
         if (TouchActionType == TouchActionType.OnTouchUp
             && e.ActionType == SKTouchAction.Released)
         {
-            if(_pendingPickedColor is null)
+            if (_pendingPickedColor is null)
             {
                 _pendingPickedColor = _touchPointColor.ToMauiColor();
-			}
+            }
             SetValue(PickedColorProperty, _pendingPickedColor);
             return;
         }
