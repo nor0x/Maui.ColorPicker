@@ -304,7 +304,7 @@ public partial class ColorPicker : ContentView
     /// Gets and Sets the background bitmap.
     /// </summary>
     /// <value>
-    /// A bitmap to use instead of the colors/>.
+    /// A bitmap to use instead of the gradient rainbow Color spectrum.
     /// </value>
     public SKBitmap Bitmap
     {
