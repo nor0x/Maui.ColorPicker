@@ -8,8 +8,7 @@
 		this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
 		<OutputType>Exe</OutputType>
-		<RootNamespace>Maui.ColorPicker.Demo</RootNamespace>
-		<UseMaui>true</UseMaui>
+		<RootNamespace>Maui.ColorPicker.Demo</RootNamespace>		
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 
