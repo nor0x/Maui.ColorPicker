@@ -1,0 +1,33 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    - name: Install MAUI Workload
+      run: dotnet workload install maui
+    - name: Add SkiaSharp NuGet Source
+      run: dotnet nuget add source https://aka.ms/skiasharp-eap/index.json
+    - name: Restore Workloads
+      run: |
+          cd Maui.ColorPicker
+          dotnet workload restore
+    - name: Restore Dependencies
+      run: |
+          cd Maui.ColorPicker
+          dotnet restore Maui.ColorPicker.csproj
+    - name: Build Project
+      run: |
+          cd Maui.ColorPicker
+          dotnet build Maui.ColorPicker.csproj --configuration Release --no-restore
