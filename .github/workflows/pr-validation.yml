@@ -26,8 +26,8 @@ jobs:
     - name: Restore Dependencies
       run: |
           cd Maui.ColorPicker
-          dotnet restore Maui.ColorPicker.sln
+          dotnet restore
     - name: Build Solution
       run: |
           cd Maui.ColorPicker
-          dotnet build Maui.ColorPicker.sln --configuration Release --no-restore
+          dotnet build --configuration Release --no-restore
