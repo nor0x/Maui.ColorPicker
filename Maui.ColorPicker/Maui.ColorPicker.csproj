@@ -15,9 +15,9 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<AssemblyVersion>2.0.4</AssemblyVersion>
-		<AssemblyFileVersion>2.0.4</AssemblyFileVersion>
-		<Version>2.0.4</Version>
+		<AssemblyVersion>2.0.5</AssemblyVersion>
+		<AssemblyFileVersion>2.0.5</AssemblyFileVersion>
+		<Version>2.0.5</Version>
 		<Title>nor0x.Maui.ColorPicker</Title>
 		<PackageId>nor0x.Maui.ColorPicker</PackageId>
 		<PackageReleaseNotes>https://github.com/nor0x/Maui.ColorPicker/releases</PackageReleaseNotes>
@@ -30,7 +30,7 @@
 		<Description>a color picker control for .NET MAUI powered on SkiaSharp</Description>
 		<Owners>Joachim Leonfellner</Owners>
 		<Authors>Joachim Leonfellner</Authors>
-		<Copyright>Copyright 2019-2024 nor0x</Copyright>
+		<Copyright>Copyright 2019-2025 nor0x</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 
