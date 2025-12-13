@@ -6,6 +6,10 @@
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->		
 		<SingleProject>true</SingleProject>
+		<UseMaui>true</UseMaui>
+		<MauiCompile>true</MauiCompile>
+		<EmbedAllSources>true</EmbedAllSources>
+		<IncludeMauiXaml>true</IncludeMauiXaml>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
@@ -15,9 +19,9 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<AssemblyVersion>2.0.5</AssemblyVersion>
-		<AssemblyFileVersion>2.0.5</AssemblyFileVersion>
-		<Version>2.0.5</Version>
+		<AssemblyVersion>2.0.5.1</AssemblyVersion>
+		<AssemblyFileVersion>2.0.5.1</AssemblyFileVersion>
+		<Version>2.0.5.1</Version>
 		<Title>nor0x.Maui.ColorPicker</Title>
 		<PackageId>nor0x.Maui.ColorPicker</PackageId>
 		<PackageReleaseNotes>https://github.com/nor0x/Maui.ColorPicker/releases</PackageReleaseNotes>
